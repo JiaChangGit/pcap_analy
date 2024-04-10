@@ -8,9 +8,7 @@ Git commit message template with .stCommitMsg
 
 How to use:
 
-"""
 ./pcap_analysis 0
-"""
 
 ## Notice
 1. big endian or little endian
