@@ -1,3 +1,14 @@
+#pragma GCC optimize("Ofast,unroll-loops,no-stack-protector,fast-math,inline")
+#pragma GCC target( \
+    "sse,sse2,sse3,ssse3,sse4,sse4.1,sse4.2,popcnt,abm,mmx,avx,tune=native")
+#pragma comment(linker, "/stack:200000000")
+#pragma GCC target("f16c")
+
+#pragma GCC diagnostic error "-fwhole-program"
+#pragma GCC diagnostic error "-fcse-skip-blocks"
+#pragma GCC diagnostic error "-funsafe-loop-optimizations"
+#pragma GCC diagnostic error "-std=c++14"
+
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,9 +16,9 @@
 
 // IO file path
 const char *Pcap_path = "./traces/trace1.pcap";
-const char *Output_path = "./INFO/pcap_result.txt";
-const char *OutTxt_path = "./INFO/trace.txt";
-const char *OutB_path = "./INFO/binary.dat";
+const char *Output_path = "./INFO/old_pcap_result.txt";
+const char *OutTxt_path = "./INFO/old_trace.txt";
+const char *OutB_path = "./INFO/old_binary.dat";
 
 // 儲存轉化的ip地址。
 char tempSrcIp[256];
@@ -160,15 +171,14 @@ int main(int argc, char *argv[]) {
     dim5->SrcIP = ntohl(dim5->SrcIP);
     dim5->DstIP = ntohl(dim5->DstIP);
 
-    fprintf(output, "%ld    %s     %s      %d     %d      %d\n", index,
-            tempSrcIp, tempDstIp, dim5->SrcPort, dim5->DstPort, dim5->Protocol);
-
-    fprintf(output, "%ld    %u     %u      %d     %d      %d\n\n", index,
-            dim5->SrcIP, dim5->DstIP, dim5->SrcPort, dim5->DstPort,
-            dim5->Protocol);
-
-    fprintf(outTxt, "%u\t%u\t%d\t%d\t%d\n", dim5->SrcIP, dim5->DstIP,
+    fprintf(output, "%ld %s %s %d %d %d\n", index, tempSrcIp, tempDstIp,
             dim5->SrcPort, dim5->DstPort, dim5->Protocol);
+
+    fprintf(output, "%ld %u %u %d %d %d\n\n", index, dim5->SrcIP, dim5->DstIP,
+            dim5->SrcPort, dim5->DstPort, dim5->Protocol);
+
+    fprintf(outTxt, "%u %u %d %d %d\n", dim5->SrcIP, dim5->DstIP, dim5->SrcPort,
+            dim5->DstPort, dim5->Protocol);
     // write dat (binary)
     // htonl: host to net long int 32 bytes
     if (eightBitsReverse == 0) {
@@ -190,7 +200,7 @@ int main(int argc, char *argv[]) {
       dim5_tmp->DstIP = ntohl(dim5_tmp->DstIP);
     }
     fprintf(output, "======== convert TEST ========\n");
-    fprintf(output, "%ld    %u     %u      %d     %d      %d\n", index,
+    fprintf(output, "%ld %u %u %d %d %d\n", index,
             (unsigned int)dim5_tmp->SrcIP, (unsigned int)dim5_tmp->DstIP,
             dim5_tmp->SrcPort, dim5_tmp->DstPort, dim5_tmp->Protocol);
     fprintf(output, "==============================\n\n\n");
