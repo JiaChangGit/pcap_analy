@@ -2,7 +2,7 @@
 
 
 ## Environment
-Ubuntu22.04
+Ubuntu22.04, g++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, python3.10.12-64bits
 
 Git commit message template with .stCommitMsg
 
@@ -33,24 +33,11 @@ const std::string LoadTestPath = "./INFO/loadTest.txt";
 
 ReadPath = "./INFO/trace.txt"
 
-SaveFigPath = "./INFO/unique3D_scatter.png"
+SaveFigPath = "./INFO/same3D_scatter.png"
 
-
-  pcap_analysis.c:
-
-const char *Pcap_path = "./traces/trace1.pcap";
-
-const char *Output_path = "./INFO/old_pcap_result.txt";
-
-const char *OutTxt_path = "./INFO/old_trace.txt";
-
-const char *OutB_path = "./INFO/old_binary.dat";
+SaveFigPath2 = "./INFO/bar.png"
 
 5. test.pcap: with ethernet, trace1.pcap: without ethernet
-
-6. static.py: Filter out data with count greater than 1000
-
-high_count_data = plot_data[plot_data['count'] > 1000]
 
 
 ## How to Use
@@ -81,16 +68,15 @@ pcap_analysis                                                      //
 ├─ .stCommitMsg                                                    //
 ├─ INFO                                                            //
 │  ├─ loadTest.txt                                                 //
-│  ├─ old_pcap_result.txt                                          //
-│  ├─ old_trace.txt                                                //
 │  ├─ pcap_result.txt                                              //
+│  ├─ binary.dat                                                   //
+│  ├─ same3D_scatter.png                                           //
 │  └─ trace.txt                                                    //
 ├─ LICENSE                                                         //
 ├─ README.md                                                       //
 ├─ docs                                                            //
 │  ├─ header.md                                                    //
 │  └─ ipReverse.md                                                 //
-├─ pcap_analysis.c                                                 //
 ├─ pcap_analysis.cpp                                               //
 ├─ static.py                                                       //
 └─ traces                                                          //

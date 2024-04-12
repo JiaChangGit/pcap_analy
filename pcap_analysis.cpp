@@ -24,7 +24,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+// const std::string PcapPath = "./traces/test.pcap";
 const std::string PcapPath = "./traces/trace1.pcap";
 const std::string OutputPath = "./INFO/pcap_result.txt";
 const std::string OutTxtPath = "./INFO/trace.txt";
@@ -258,13 +258,13 @@ class LoadToVec {
     std::ofstream file(loadTestPath);
     file << "originSize: " << originSize << "    "
          << "uniqsize: " << uniqV.size() << "\n";
-    file << "SIP  DIP  SP  DP  PROT    NUM: "
+    file << "SIP DIP  SP   DP    PROT     NUM: "
          << "\n\n";
     size_t counter = 0;
     for (const auto& it : uniqV) {
-      file << it.first.SrcIP << " " << it.first.DstIP << " " << it.first.SrcPort
-           << " " << it.first.DstPort << " " << it.first.Protocol << "    "
-           << it.second << "\n";
+      file << it.first.SrcIP << " " << it.first.DstIP << "  "
+           << it.first.SrcPort << "   " << it.first.DstPort << "    "
+           << it.first.Protocol << "     " << it.second << "\n";
       counter = counter + it.second;
     }
     if (counter != originSize) {
