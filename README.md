@@ -70,6 +70,7 @@ pcap_analysis                                                      //
 │  ├─ loadTest.txt                                                 //
 │  ├─ pcap_result.txt                                              //
 │  ├─ binary.dat                                                   //
+│  ├─ bar.png                                                      //
 │  ├─ same3D_scatter.png                                           //
 │  └─ trace.txt                                                    //
 ├─ LICENSE                                                         //
