@@ -69,9 +69,8 @@ pcap_analysis                                                      //
 ├─ INFO                                                            //
 │  ├─ loadTest.txt                                                 //
 │  ├─ pcap_result.txt                                              //
-│  ├─ binary.dat                                                   //
-│  ├─ bar.png                                                      //
-│  ├─ same3D_scatter.png                                           //
+│  ├─ plot5D.png                                                   //
+│  ├─ plot5D_lg.png                                                //
 │  └─ trace.txt                                                    //
 ├─ LICENSE                                                         //
 ├─ README.md                                                       //
@@ -80,6 +79,7 @@ pcap_analysis                                                      //
 │  └─ ipReverse.md                                                 //
 ├─ pcap_analysis.cpp                                               //
 ├─ static.py                                                       //
+├─ static_lg.py                                                    //
 └─ traces                                                          //
    ├─ test.pcap                                                    //
    └─ trace1.pcap                                                  //

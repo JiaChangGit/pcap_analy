@@ -18,6 +18,7 @@
 #include <netinet/in.h>
 
 #include <algorithm>
+#include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -27,7 +28,7 @@
 // const std::string PcapPath = "./traces/test.pcap";
 const std::string PcapPath = "./traces/trace1.pcap";
 const std::string OutputPath = "./INFO/pcap_result.txt";
-const std::string OutTxtPath = "./INFO/trace.txt";
+const char* OutTxtPath = "./INFO/trace.txt";
 const std::string OutBPath = "./INFO/binary.dat";
 const std::string LoadTestPath = "./INFO/loadTest.txt";
 
@@ -226,31 +227,36 @@ class PcapProcessor {
 };
 
 template <typename T>
-class LoadToVec {
+class DataHandler {
  public:
-  LoadToVec(size_t _originSize) : originSize(_originSize) {}
+  DataHandler(size_t _originSize) : originSize(_originSize) {}
   void load(const std::string& outTxtPath) {
     std::ifstream file(outTxtPath);
     std::string line;
 
-    T tmp;
+    unsigned tmp[5];
+    T dim;
     while (std::getline(file, line)) {
       std::istringstream iss(line);
-      if (!(iss >> tmp.SrcIP >> tmp.DstIP >> tmp.SrcPort >> tmp.DstPort >>
-            tmp.Protocol)) {
+      if (!(iss >> tmp[0] >> tmp[1] >> tmp[2] >> tmp[3] >> tmp[4])) {
         std::cerr << "Error reading line: " << line << "\n";
         break;
       }
+      dim.SrcIP = tmp[0];
+      dim.DstIP = tmp[1];
+      dim.SrcPort = tmp[2];
+      dim.DstPort = tmp[3];
+      dim.Protocol = tmp[4];
       bool found = false;
       for (auto& it : uniqV) {
-        if (it.first == tmp) {
+        if (it.first == dim) {
           ++it.second;
           found = true;
           break;
         }
       }
       if (!found) {
-        uniqV.emplace_back(tmp, 1);
+        uniqV.emplace_back(dim, 1);
       }
     }
   }
@@ -262,9 +268,11 @@ class LoadToVec {
          << "\n\n";
     size_t counter = 0;
     for (const auto& it : uniqV) {
-      file << it.first.SrcIP << " " << it.first.DstIP << "  "
-           << it.first.SrcPort << "   " << it.first.DstPort << "    "
-           << it.first.Protocol << "     " << it.second << "\n";
+      file << unsigned(it.first.SrcIP) << " " << unsigned(it.first.DstIP)
+           << "  " << unsigned(it.first.SrcPort) << "   "
+           << unsigned(it.first.DstPort) << "    "
+           << unsigned(it.first.Protocol) << "     " << unsigned(it.second)
+           << "\n";
       counter = counter + it.second;
     }
     if (counter != originSize) {
@@ -299,17 +307,17 @@ int main(int argc, char** argv) {
     PcapProcessor<Dim5NoAlign> processor(PcapPath, OutputPath, OutTxtPath,
                                          OutBPath, eightBitsReverse, eth);
     vSize = processor.processPcap();
-    LoadToVec<Dim5NoAlign> loadToVec(vSize);
-    loadToVec.load(OutTxtPath);
-    loadToVec.print(LoadTestPath);
+    DataHandler<Dim5NoAlign> dataHandler(vSize);
+    dataHandler.load(OutTxtPath);
+    dataHandler.print(LoadTestPath);
 
   } else {
     PcapProcessor<Dim5> processor(PcapPath, OutputPath, OutTxtPath, OutBPath,
                                   eightBitsReverse, eth);
     vSize = processor.processPcap();
-    LoadToVec<Dim5> loadToVec(vSize);
-    loadToVec.load(OutTxtPath);
-    loadToVec.print(LoadTestPath);
+    DataHandler<Dim5> dataHandler(vSize);
+    dataHandler.load(OutTxtPath);
+    dataHandler.print(LoadTestPath);
   }
 
   return 0;

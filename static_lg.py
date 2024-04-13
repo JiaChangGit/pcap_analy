@@ -5,8 +5,8 @@ from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
 def load_data_draw(filename):
     #filename = './INFO/loadTest.txt'
-    SaveFigPath = "./INFO/same3D_scatter.png"
-    SaveFigPath2 = "./INFO/plot5D.png"
+    SaveFigPath = "./INFO/same3D_scatter_lg.png"
+    SaveFigPath2 = "./INFO/plot5D_lg.png"
     data = np.loadtxt(filename, skiprows=2, dtype=int)
     columns = ['source_ip', 'destination_ip', 'source_port', 'destination_port', 'protocol', 'count']
     df = pd.DataFrame(data, columns=columns)
@@ -28,22 +28,22 @@ def load_data_draw(filename):
     # 繪製三維散點圖
     ax = fig.add_subplot(111, projection='3d')
     # 設定散點的大小和顏色
-    size = 10
-    ax.scatter(plot_data['source_ip'], plot_data['destination_ip'], plot_data['source_port'], s=size, c=colors, alpha=0.6)
+    size = 2
+    ax.scatter(np.log2(plot_data['source_ip']+1), np.log2(plot_data['destination_ip']+1), np.log2(plot_data['source_port']+1), s=size, c=colors, alpha=0.6)
 
     # 在圖上標記出count大於的點的數值
     for i, row in high_count_data.iterrows():
-        ax.text(row['source_ip'], row['destination_ip'], row['source_port'], str(row['count']), color='black', fontsize=16)
+        ax.text(np.log2(row['source_ip']+1), np.log2(row['destination_ip']+1), np.log2(row['source_port']+1), str(row['count']), color='black', fontsize=16)
 
     # 設定座標軸標籤
     ax.set_xlabel('Source IP')
     ax.set_ylabel('Destination IP')
     ax.set_zlabel('Source Port')
     # 設定軸顯示範圍
-    ax.set_xlim(plot_data['source_ip'].min(), plot_data['source_ip'].max())
-    ax.set_ylim(plot_data['destination_ip'].min(), plot_data['destination_ip'].max())
-    ax.set_zlim(plot_data['source_port'].min(), plot_data['source_port'].max())
-    ax.set_title('Scatter Plot of same trace num')
+    ax.set_xlim(np.log2(plot_data['source_ip'].min()+1), np.log2(plot_data['source_ip'].max()))
+    ax.set_ylim(np.log2(plot_data['destination_ip'].min()+1), np.log2(plot_data['destination_ip'].max()))
+    ax.set_zlim(np.log2(plot_data['source_port'].min()+1), np.log2(plot_data['source_port'].max()))
+    ax.set_title('Scatter Plot of same trace num (lg)')
     # 新增顏色條
     plt.colorbar(mappable, ax=ax, label='Count')
 
@@ -58,14 +58,14 @@ def load_data_draw(filename):
         grouped = df.groupby(col)['count'].sum().reset_index(name='same')
         # 僅選擇出現次數大於200的數據
         plot_data = grouped[grouped['same'] > 200]
-        ax.plot(plot_data[col], plot_data['same'], color='blue', marker='*')
+        ax.plot(np.log2(plot_data[col]+1), plot_data['same'], color='blue', marker='*')
         ax.set_xlabel(col)
         ax.set_ylabel('same')
-        ax.set_xlim(plot_data[col].min(), plot_data[col].max())
+        ax.set_xlim(np.log2(plot_data[col].min()+1), np.log2(plot_data[col].max()))
         ax.set_ylim(plot_data['same'].min(), plot_data['same'].max())
         ax.set_title(f'Plot of same for {col}')
         # highlight 次數大於10000的數據
-        for x, y in zip(plot_data[col],plot_data['same']):
+        for x, y in zip(np.log2(plot_data[col]+1),plot_data['same']):
             if y>10000:
                 s = f"{x}, {y}"
                 ax.annotate(s,(x,y),textcoords="offset points",xytext=(0,10))
