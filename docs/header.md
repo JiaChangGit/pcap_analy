@@ -67,8 +67,11 @@ typedef struct IPHeader_t {
 } IPHeader_t;
 
 // TCP, UDP
+
 typedef struct TCPUDPHeader_t {
+
   u_int16_t SrcPort;
+  
   u_int16_t DstPort;
 
 } TCPUDPHeader_t;
