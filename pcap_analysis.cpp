@@ -28,7 +28,7 @@
 // const std::string PcapPath = "./traces/test.pcap";
 const std::string PcapPath = "./traces/trace1.pcap";
 const std::string OutputPath = "./INFO/pcap_result.txt";
-const char* OutTxtPath = "./INFO/trace.txt";
+const std::string OutTxtPath = "./INFO/trace.txt";
 const std::string OutBPath = "./INFO/binary.dat";
 const std::string LoadTestPath = "./INFO/loadTest.txt";
 
@@ -99,9 +99,11 @@ class PcapProcessor {
         OutTxt_path(_OutTxt_path),
         OutB_path(_OutB_path),
         eightBitsReverse(_eightBitsReverse),
-        eth(_eth) {}
+        eth(_eth),
+        index(0),
+        notIpV4Nums(0) {}
 
-  size_t processPcap() {
+  void processPcap() {
     pcap_pkthdr ptk_header;
     IPHeader_t ip_header;
     TCPUDPHeader_t tcpudp_header;
@@ -127,7 +129,6 @@ class PcapProcessor {
               "protocol\n";
 
     long int pkt_offset = 24;  // pcap header 24 bytes
-    size_t index = 0;
 
     while (true) {
       fseek(pFile, pkt_offset, SEEK_SET);
@@ -153,69 +154,81 @@ class PcapProcessor {
         std::cerr << "index: " << index << " can not read ip_header\n";
         break;
       }
+      // Determine IP version
+      // std::cout << std::hex << unsigned((ip_header.Ver_HLen) >> 4) << "\n";
+      if (unsigned((ip_header.Ver_HLen) >> 4) == 4) {
+        memset(&tcpudp_header, 0, sizeof(TCPUDPHeader_t));
+        if (fread(&tcpudp_header, sizeof(TCPUDPHeader_t), 1, pFile) != 1) {
+          std::cerr << "index: " << index << " can not read tcpudp_header\n";
+          break;
+        }
 
-      memset(&tcpudp_header, 0, sizeof(TCPUDPHeader_t));
-      if (fread(&tcpudp_header, sizeof(TCPUDPHeader_t), 1, pFile) != 1) {
-        std::cerr << "index: " << index << " can not read tcpudp_header\n";
-        break;
+        dim5.SrcIP = ip_header.SrcIP;
+        dim5.DstIP = ip_header.DstIP;
+        dim5.Protocol = ip_header.Protocol;
+        dim5.SrcPort = tcpudp_header.SrcPort;
+        dim5.DstPort = tcpudp_header.DstPort;
+
+        char tempSrcIp[256];
+        char tempDstIp[256];
+        inet_ntop(AF_INET, &(ip_header.SrcIP), tempSrcIp, sizeof(tempSrcIp));
+        inet_ntop(AF_INET, &(ip_header.DstIP), tempDstIp, sizeof(tempDstIp));
+
+        dim5.SrcPort = ntohs(dim5.SrcPort);
+        dim5.DstPort = ntohs(dim5.DstPort);
+        dim5.SrcIP = ntohl(dim5.SrcIP);
+        dim5.DstIP = ntohl(dim5.DstIP);
+
+        output << index << "\t" << tempSrcIp << "\t" << tempDstIp << "\t"
+               << dim5.SrcPort << "\t" << dim5.DstPort << "\t"
+               << unsigned(dim5.Protocol) << "\n";
+        output << index << "\t" << dim5.SrcIP << "\t" << dim5.DstIP << "\t"
+               << dim5.SrcPort << "\t" << dim5.DstPort << "\t"
+               << unsigned(dim5.Protocol) << "\n";
+
+        outTxt << dim5.SrcIP << " " << dim5.DstIP << " " << dim5.SrcPort << " "
+               << dim5.DstPort << " " << unsigned(dim5.Protocol) << "\n";
+
+        if (eightBitsReverse == 0) {
+          dim5.SrcPort = htons(dim5.SrcPort);
+          dim5.DstPort = htons(dim5.DstPort);
+          dim5.SrcIP = htonl(dim5.SrcIP);
+          dim5.DstIP = htonl(dim5.DstIP);
+        }
+
+        // write dat test
+        outB.write(reinterpret_cast<const char*>(&dim5), sizeof(T));
+        outB.seekg(-1 * static_cast<int>(sizeof(T)), std::ios::cur);
+        outB.read(reinterpret_cast<char*>(&dim5_tmp), sizeof(T));
+
+        if (eightBitsReverse == 0) {
+          dim5_tmp.SrcPort = htons(dim5_tmp.SrcPort);
+          dim5_tmp.DstPort = htons(dim5_tmp.DstPort);
+          dim5_tmp.SrcIP = ntohl(dim5_tmp.SrcIP);
+          dim5_tmp.DstIP = ntohl(dim5_tmp.DstIP);
+        }
+        output << "======== convert TEST ========\n";
+        output << index << "    " << unsigned(dim5_tmp.SrcIP) << "     "
+               << unsigned(dim5_tmp.DstIP) << "      "
+               << unsigned(dim5_tmp.SrcPort) << "     "
+               << unsigned(dim5_tmp.DstPort) << "      "
+               << unsigned(dim5_tmp.Protocol) << "\n";
+        output << "==============================\n\n\n";
+      } else {
+        ++notIpV4Nums;
+        // std::cout << "index: " << index << " not ipV4!!\n";
       }
-
-      dim5.SrcIP = ip_header.SrcIP;
-      dim5.DstIP = ip_header.DstIP;
-      dim5.Protocol = ip_header.Protocol;
-      dim5.SrcPort = tcpudp_header.SrcPort;
-      dim5.DstPort = tcpudp_header.DstPort;
-
-      char tempSrcIp[256];
-      char tempDstIp[256];
-      inet_ntop(AF_INET, &(ip_header.SrcIP), tempSrcIp, sizeof(tempSrcIp));
-      inet_ntop(AF_INET, &(ip_header.DstIP), tempDstIp, sizeof(tempDstIp));
-
-      dim5.SrcPort = ntohs(dim5.SrcPort);
-      dim5.DstPort = ntohs(dim5.DstPort);
-      dim5.SrcIP = ntohl(dim5.SrcIP);
-      dim5.DstIP = ntohl(dim5.DstIP);
-
-      output << index << "\t" << tempSrcIp << "\t" << tempDstIp << "\t"
-             << dim5.SrcPort << "\t" << dim5.DstPort << "\t"
-             << unsigned(dim5.Protocol) << "\n";
-      output << index << "\t" << dim5.SrcIP << "\t" << dim5.DstIP << "\t"
-             << dim5.SrcPort << "\t" << dim5.DstPort << "\t"
-             << unsigned(dim5.Protocol) << "\n";
-
-      outTxt << dim5.SrcIP << " " << dim5.DstIP << " " << dim5.SrcPort << " "
-             << dim5.DstPort << " " << unsigned(dim5.Protocol) << "\n";
-
-      if (eightBitsReverse == 0) {
-        dim5.SrcPort = htons(dim5.SrcPort);
-        dim5.DstPort = htons(dim5.DstPort);
-        dim5.SrcIP = htonl(dim5.SrcIP);
-        dim5.DstIP = htonl(dim5.DstIP);
-      }
-
-      // write dat test
-      outB.write(reinterpret_cast<const char*>(&dim5), sizeof(T));
-      outB.seekg(-1 * static_cast<int>(sizeof(T)), std::ios::cur);
-      outB.read(reinterpret_cast<char*>(&dim5_tmp), sizeof(T));
-
-      if (eightBitsReverse == 0) {
-        dim5_tmp.SrcPort = htons(dim5_tmp.SrcPort);
-        dim5_tmp.DstPort = htons(dim5_tmp.DstPort);
-        dim5_tmp.SrcIP = ntohl(dim5_tmp.SrcIP);
-        dim5_tmp.DstIP = ntohl(dim5_tmp.DstIP);
-      }
-      output << "======== convert TEST ========\n";
-      output << index << "    " << unsigned(dim5_tmp.SrcIP) << "     "
-             << unsigned(dim5_tmp.DstIP) << "      "
-             << unsigned(dim5_tmp.SrcPort) << "     "
-             << unsigned(dim5_tmp.DstPort) << "      "
-             << unsigned(dim5_tmp.Protocol) << "\n";
-      output << "==============================\n\n\n";
     }
 
     fclose(pFile);
-    return index - 1;
+    output.close();
+    outTxt.close();
+    outB.close();
+    std::cout << "Not ipV4 nums: " << notIpV4Nums << "\n";
   }
+  size_t getPcapNums() { return index - 1; }
+  size_t getNotIpV4() { return notIpV4Nums; }
+  size_t gettotalFlows() { return getPcapNums() - getNotIpV4(); }
 
  private:
   std::string Pcap_path;
@@ -224,12 +237,14 @@ class PcapProcessor {
   std::string OutB_path;
   int eightBitsReverse;
   int eth;
+  size_t index, notIpV4Nums;
 };
 
 template <typename T>
 class DataHandler {
  public:
-  DataHandler(size_t _originSize) : originSize(_originSize) {}
+  DataHandler(size_t _pcapNums, size_t _totalFlows)
+      : pcapNums(_pcapNums), totalFlows(_totalFlows) {}
   void load(const std::string& outTxtPath) {
     std::ifstream file(outTxtPath);
     std::string line;
@@ -262,9 +277,10 @@ class DataHandler {
   }
   void print(const std::string& loadTestPath) {
     std::ofstream file(loadTestPath);
-    file << "originSize: " << originSize << "    "
-         << "uniqsize: " << uniqV.size() << "\n";
-    file << "SIP DIP  SP   DP    PROT     NUM: "
+    file << "pcapNums: " << pcapNums << "    "
+         << "totalFlows: " << totalFlows << "    "
+         << "uniqSize: " << uniqV.size() << "\n";
+    file << "SIP DIP  SP   DP    PROTO     SAME: "
          << "\n\n";
     size_t counter = 0;
     for (const auto& it : uniqV) {
@@ -275,15 +291,15 @@ class DataHandler {
            << "\n";
       counter = counter + it.second;
     }
-    if (counter != originSize) {
+    if (counter != totalFlows) {
       std::cerr << "Error counter: " << counter
-                << " / originSize: " << originSize << "\n";
+                << " / totalFlows: " << totalFlows << "\n";
     }
   }
 
  private:
   std::vector<std::pair<T, size_t>> uniqV;
-  size_t originSize;
+  size_t pcapNums, totalFlows;
 };
 
 int main(int argc, char** argv) {
@@ -306,16 +322,20 @@ int main(int argc, char** argv) {
   if (alignment == 0) {
     PcapProcessor<Dim5NoAlign> processor(PcapPath, OutputPath, OutTxtPath,
                                          OutBPath, eightBitsReverse, eth);
-    vSize = processor.processPcap();
-    DataHandler<Dim5NoAlign> dataHandler(vSize);
+    processor.processPcap();
+    size_t pcapNums = processor.getPcapNums();
+    size_t totalFlows = processor.gettotalFlows();
+    DataHandler<Dim5NoAlign> dataHandler(pcapNums, totalFlows);
     dataHandler.load(OutTxtPath);
     dataHandler.print(LoadTestPath);
 
   } else {
     PcapProcessor<Dim5> processor(PcapPath, OutputPath, OutTxtPath, OutBPath,
                                   eightBitsReverse, eth);
-    vSize = processor.processPcap();
-    DataHandler<Dim5> dataHandler(vSize);
+    processor.processPcap();
+    size_t pcapNums = processor.getPcapNums();
+    size_t totalFlows = processor.gettotalFlows();
+    DataHandler<Dim5> dataHandler(pcapNums, totalFlows);
     dataHandler.load(OutTxtPath);
     dataHandler.print(LoadTestPath);
   }

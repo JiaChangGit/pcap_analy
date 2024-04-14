@@ -1,13 +1,15 @@
-# pcap_analy
+# pcap_analysis
 
 
 ## Environment
+
 Ubuntu22.04, g++ (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0, python3.10.12-64bits
 
 Git commit message template with .stCommitMsg
 
 
 ## Notice
+
 1. big endian or little endian
 
 2. ip 8-bits reverse
@@ -31,30 +33,48 @@ const std::string LoadTestPath = "./INFO/loadTest.txt";
 
   static.py:
 
-ReadPath = "./INFO/trace.txt"
+filePath = './INFO/loadTest.txt'
 
 SaveFigPath = "./INFO/same3D_scatter.png"
 
-SaveFigPath2 = "./INFO/bar.png"
+SaveFigPath2 = "./INFO/plot5D.png"
+
+
+  static_lg.py:
+
+filePath = './INFO/loadTest.txt'
+
+SaveFigPath = "./INFO/same3D_scatter_lg.png"
+
+SaveFigPath2 = "./INFO/plot5D_lg.png"
 
 5. test.pcap: with ethernet, trace1.pcap: without ethernet
+
+6. pcap_analysis.cpp will extract ipV4 on .pcap file, we do not consider ipV6
+
+7. Create OutB file first! Otherwise, no binary file will be created
 
 
 ## How to Use
 
 1. check IO path
 
-2. check library (ex: #include <arpa/inet.h>、#include <netinet/in.h>......)
+2. check library (ex: #include <arpa/inet.h>、#include <netinet/in.h> and python......)
 
-3. check with ethernet, without ethernet
+3. check with ethernet, or without ethernet
 
 4. run pcap_analysis.cpp first:
 
 g++ "pcap_analysis.cpp" -o "pcap_analysis" && "./pcap_analysis"
 
-5. then run static.py:
+5. then run static.py and static_lg.py:
 
 python3 static.py
+
+python3 static_lg.py
+
+
+6. remeber we are only considering ipV4, your pcap file allows ipV6, but we won't extract it
 
 
 ## Project Tree:
@@ -69,6 +89,9 @@ pcap_analysis                                                      //
 ├─ INFO                                                            //
 │  ├─ loadTest.txt                                                 //
 │  ├─ pcap_result.txt                                              //
+│  ├─ binary.dat                                                   //
+│  ├─ same3D_scatter_lg.png                                        //
+│  ├─ same3D_scatter.png                                           //
 │  ├─ plot5D.png                                                   //
 │  ├─ plot5D_lg.png                                                //
 │  └─ trace.txt                                                    //
@@ -88,4 +111,5 @@ pcap_analysis                                                      //
 
 
 ## License
+
 MIT License

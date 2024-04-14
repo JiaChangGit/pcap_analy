@@ -3,11 +3,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib.cm import ScalarMappable
-def load_data_draw(filename):
-    #filename = './INFO/loadTest.txt'
-    SaveFigPath = "./INFO/same3D_scatter_lg.png"
-    SaveFigPath2 = "./INFO/plot5D_lg.png"
-    data = np.loadtxt(filename, skiprows=2, dtype=int)
+
+filePath = './INFO/loadTest.txt'
+SaveFigPath = "./INFO/same3D_scatter_lg.png"
+SaveFigPath2 = "./INFO/plot5D_lg.png"
+
+def load_data_draw(filePath):
+    data = np.loadtxt(filePath, skiprows=2, dtype=int)
     columns = ['source_ip', 'destination_ip', 'source_port', 'destination_port', 'protocol', 'count']
     df = pd.DataFrame(data, columns=columns)
     # 僅選擇出現次數大於10的數據
@@ -77,7 +79,7 @@ def load_data_draw(filename):
 
 
 def main():
-    load_data_draw('./INFO/loadTest.txt')
+    load_data_draw(filePath)
 
 
 if __name__ == "__main__":
