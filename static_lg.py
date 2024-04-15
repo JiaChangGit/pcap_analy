@@ -42,9 +42,9 @@ def load_data_draw(filePath):
     ax.set_ylabel('Destination IP')
     ax.set_zlabel('Source Port')
     # 設定軸顯示範圍
-    ax.set_xlim(np.log2(plot_data['source_ip'].min()+1), np.log2(plot_data['source_ip'].max()))
-    ax.set_ylim(np.log2(plot_data['destination_ip'].min()+1), np.log2(plot_data['destination_ip'].max()))
-    ax.set_zlim(np.log2(plot_data['source_port'].min()+1), np.log2(plot_data['source_port'].max()))
+    ax.set_xlim(np.log2(plot_data['source_ip'].min()), np.log2(plot_data['source_ip'].max()))
+    ax.set_ylim(np.log2(plot_data['destination_ip'].min()), np.log2(plot_data['destination_ip'].max()))
+    ax.set_zlim(np.log2(plot_data['source_port'].min()), np.log2(plot_data['source_port'].max()))
     ax.set_title('Scatter Plot of same trace num (lg)')
     # 新增顏色條
     plt.colorbar(mappable, ax=ax, label='Count')
@@ -63,15 +63,15 @@ def load_data_draw(filePath):
         ax.plot(np.log2(plot_data[col]+1), plot_data['same'], color='blue', marker='*')
         ax.set_xlabel(col)
         ax.set_ylabel('same')
-        ax.set_xlim(np.log2(plot_data[col].min()+1), np.log2(plot_data[col].max()))
+        ax.set_xlim(np.log2(plot_data[col].min()), np.log2(plot_data[col].max()))
         ax.set_ylim(plot_data['same'].min(), plot_data['same'].max())
-        ax.set_title(f'Plot of same for {col}')
         # highlight 次數大於10000的數據
-        for x, y in zip(np.log2(plot_data[col]+1),plot_data['same']):
+        for x, y in zip(np.log2(plot_data[col]),plot_data['same']):
             if y>10000:
-                s = f"{x}, {y}"
-                ax.annotate(s,(x,y),textcoords="offset points",xytext=(0,10))
+                s = f"{x:.2f}, {y}"
+                ax.annotate(s,(x,y),textcoords="offset points",xytext=(0,18))
 
+    ax.set_title('Plot of same x-ax (lg)')
     plt.tight_layout()
     plt.savefig(SaveFigPath2)
     plt.show()
