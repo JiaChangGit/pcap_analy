@@ -68,7 +68,7 @@ def load_data_draw(filePath):
         # highlight 次數大於10000的數據
         for x, y in zip(plot_data[col],plot_data['same']):
             if y>10000:
-                s = f"{x:.2f}, {y}"
+                s = f"{x}, {y}"
                 ax.annotate(s,(x,y),textcoords="offset points",xytext=(0,18))
 
     ax.set_title('Plot of same x-ax')
