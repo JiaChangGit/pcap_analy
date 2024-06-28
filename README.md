@@ -55,6 +55,13 @@ SaveFigPath2 = "./INFO/plot5D_lg.png"
 7. Create OutB file first! Otherwise, no binary file will be created
 
 
+## Requirement
+
+sudo apt-get install python3-tk
+
+pip install pandas matplotlib numpy
+
+
 ## How to Use
 
 1. check IO path
@@ -75,6 +82,10 @@ python3 static_lg.py
 
 
 6. remeber we are only considering ipV4, your pcap file allows ipV6, but we won't extract it
+
+YT:
+
+https://youtu.be/3g5O5k13qJw
 
 
 ## Project Tree:
